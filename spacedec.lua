@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 -- Function to create a highlight effect on a given part
 local function createHighlight(part, color)
@@ -52,6 +53,24 @@ local function clearPlayerHighlights()
             if head then
                 removeHighlight(head)
             end
+        end
+    end
+end
+
+-- Function to lock the cursor onto the player's head
+local function lockCursorOnHead()
+    local player = Players.LocalPlayer
+    local character = player.Character
+
+    if character then
+        local head = character:FindFirstChild("Head")
+
+        if head then
+            local mouse = player:GetMouse()
+            local headScreenPos = head.Position:PointToWorldSpace(Vector3.new(0, 0, 0))
+
+            mouse.X = headScreenPos.x
+            mouse.Y = headScreenPos.y
         end
     end
 end
@@ -123,11 +142,9 @@ espButton.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
 
     if espEnabled then
-        -- Add ESP logic here
-        print("ESP Enabled")
+        updatePlayerHighlights()
     else
-        -- Remove ESP logic here
-        print("ESP Disabled")
+        clearPlayerHighlights()
     end
 end)
 
@@ -136,28 +153,19 @@ aimButton.MouseButton1Click:Connect(function()
     aimEnabled = not aimEnabled
 
     if aimEnabled then
-        -- Add Aim logic here
-        print("Aim Enabled")
+        UserInputService.InputChanged:Connect(lockCursorOnHead)
     else
-        -- Remove Aim logic here
-        print("Aim Disabled")
+        UserInputService.InputChanged:Disconnect(lockCursorOnHead)
     end
 end)
 
 -- Function to refresh player highlights every second
 local function refreshPlayerHighlights()
     while wait(1) do
-        if highlightEnabled then
-            clearPlayerHighlights()
-            updatePlayerHighlights()
-        end
-
         if espEnabled then
-            -- Add ESP logic here
-        end
-
-        if aimEnabled then
-            -- Add Aim logic here
+            updatePlayerHighlights()
+        else
+            clearPlayerHighlights()
         end
     end
 end
